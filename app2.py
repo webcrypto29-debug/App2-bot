@@ -14,7 +14,9 @@ API_HASH = os.environ.get("API_HASH", "575b2840f685a037000ead32cde239e1")
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "6860017124"))
 MONGO_URI = os.environ.get("MONGO_DB_URI", "mongodb+srv://webcrypto29:iR8EByf860BymwO3@cluster0.pffy51l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get("DATABASE_NAME", "MyBot2DB")
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://webcrypto29-debug.github.io/My-file-bot/index2.html")
+
+# WEBAPP URL (404 एरर ठीक करने के लिए index.html पर सेट किया गया है)
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://webcrypto29-debug.github.io/My-file-bot/index.html")
 PORT = int(os.environ.get("PORT", "8080"))
 
 # --- DATABASE SETUP ---
@@ -31,6 +33,7 @@ bot_client = Client(
     bot_token=BOT_TOKEN
 )
 
+# Database Initial Config Setup
 async def init_ads_config():
     try:
         default_config = {
@@ -49,10 +52,9 @@ async def init_ads_config():
     except Exception as e:
         print(f"Database setup notice: {e}")
 
-# --- FASTAPI LIFESPAN MANAGER ---
+# --- FASTAPI LIFESPAN MANAGER (Back4App & Pyrogram Synergy) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # App startup logic
     print("Starting Telegram Bot...")
     try:
         await bot_client.start()
@@ -61,9 +63,8 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Failed to start bot: {e}")
     
-    yield  # Application running
+    yield
     
-    # App shutdown logic
     print("Stopping Telegram Bot...")
     try:
         await bot_client.stop()
@@ -94,6 +95,7 @@ async def start_handler(client: Client, message: Message):
     except Exception as e:
         print(f"DB Error: {e}")
 
+    # Verify Ad Completion
     if len(message.command) > 1 and message.command[1] == "VERIFY_AD":
         try:
             await users_col.update_one({"_id": user_id}, {"$inc": {"credits": 3}})
@@ -152,6 +154,9 @@ async def ads_control_panel(client: Client, message: Message):
 
 @bot_client.on_callback_query(filters.regex("^toggle_"))
 async def toggle_ad_status(client, callback_query):
+    # तुरंत लोडिंग स्पिनर हटाने के लिए आंसर
+    await callback_query.answer("Processing...", show_alert=False)
+
     if callback_query.from_user.id != ADMIN_ID:
         return await callback_query.answer("Unauthorized!", show_alert=True)
 
@@ -166,7 +171,6 @@ async def toggle_ad_status(client, callback_query):
     new_status = not config.get(ad_key, True)
 
     await ads_col.update_one({"_id": "ads_setting"}, {"$set": {ad_key: new_status}})
-    await callback_query.answer(f"Updated! New status: {new_status}")
     await ads_control_panel(client, callback_query.message)
 
 @bot_client.on_message(filters.command("stats") & filters.user(ADMIN_ID))
@@ -177,3 +181,4 @@ async def stats_handler(client: Client, message: Message):
 # --- MAIN RUNNER ---
 if __name__ == "__main__":
     uvicorn.run("app2:web_app", host="0.0.0.0", port=PORT, log_level="info")
+.
