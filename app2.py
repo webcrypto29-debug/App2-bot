@@ -8,10 +8,10 @@ import uvicorn
 
 # --- CONFIGURATION ---
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8953998418:AAGeNgtWXGgEZzO-7HrtvwdL65Y5TVoDsPI")
-API_ID = int(os.environ.get("API_ID", "1234567"))
-API_HASH = os.environ.get("API_HASH", "abcdef1234567890abcdef1234567890")
-ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456789"))
-MONGO_URI = os.environ.get("MONGO_DB_URI", "")
+API_ID = int(os.environ.get("API_ID", "31367866"))
+API_HASH = os.environ.get("API_HASH", "575b2840f685a037000ead32cde239e1")
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "6860017124"))
+MONGO_URI = os.environ.get("MONGO_DB_URI", "mongodb+srv://webcrypto29:iR8EByf860BymwO3@cluster0.pffy51l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get("DATABASE_NAME", "MyBot2DB")
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://webcrypto29-debug.github.io/My-file-bot/index2.html")
 PORT = int(os.environ.get("PORT", "8080"))
@@ -25,16 +25,10 @@ async def health_check():
     return {"status": "ok", "bot": "running"}
 
 # --- DATABASE SETUP ---
-if MONGO_URI:
-    mongo_client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-    db = mongo_client[DB_NAME]
-    users_col = db["users"]
-    ads_col = db["ads_config"]
-else:
-    mongo_client = None
-    db = None
-    users_col = None
-    ads_col = None
+mongo_client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+db = mongo_client[DB_NAME]
+users_col = db["users"]
+ads_col = db["ads_config"]
 
 # --- BOT CLIENT ---
 bot_client = Client(
@@ -46,9 +40,6 @@ bot_client = Client(
 
 # Initial Ads Setup in DB safely
 async def init_ads_config():
-    if ads_col is None:
-        print("WARNING: MONGO_DB_URI is missing or invalid.")
-        return
     try:
         default_config = {
             "_id": "ads_setting",
@@ -64,7 +55,7 @@ async def init_ads_config():
         )
         print("Database connected and ads configuration initialized.")
     except Exception as e:
-        print(f"Database connection failed: {e}")
+        print(f"Database setup notice: {e}")
 
 # --- START COMMAND HANDLER ---
 @bot_client.on_message(filters.command("start") & filters.private)
@@ -73,25 +64,23 @@ async def start_handler(client: Client, message: Message):
     username = message.from_user.username or "User"
     
     credits = 0
-    if users_col is not None:
-        try:
-            user = await users_col.find_one({"_id": user_id})
-            if not user:
-                await users_col.insert_one({"_id": user_id, "username": username, "credits": 0})
-            else:
-                credits = user.get("credits", 0)
-        except Exception as e:
-            print(f"DB Error: {e}")
+    try:
+        user = await users_col.find_one({"_id": user_id})
+        if not user:
+            await users_col.insert_one({"_id": user_id, "username": username, "credits": 0})
+        else:
+            credits = user.get("credits", 0)
+    except Exception as e:
+        print(f"DB Error: {e}")
 
     # Verify Ad Completion
     if len(message.command) > 1 and message.command[1] == "VERIFY_AD":
-        if users_col is not None:
-            try:
-                await users_col.update_one({"_id": user_id}, {"$inc": {"credits": 3}})
-                updated_user = await users_col.find_one({"_id": user_id})
-                credits = updated_user.get('credits', 0) if updated_user else credits + 3
-            except Exception as e:
-                print(f"DB Error: {e}")
+        try:
+            await users_col.update_one({"_id": user_id}, {"$inc": {"credits": 3}})
+            updated_user = await users_col.find_one({"_id": user_id})
+            credits = updated_user.get('credits', 0) if updated_user else credits + 3
+        except Exception as e:
+            print(f"DB Error: {e}")
         
         await message.reply_text(
             f"🎉 **Ad Verified Successfully!**\n\n"
@@ -115,10 +104,10 @@ async def start_handler(client: Client, message: Message):
 # --- ADVANCED ADS CONTROL PANEL (ADMIN ONLY) ---
 @bot_client.on_message(filters.command("ads") & filters.user(ADMIN_ID))
 async def ads_control_panel(client: Client, message: Message):
-    if ads_col is None:
-        return await message.reply_text("❌ Database not connected.")
-    
-    config = await ads_col.find_one({"_id": "ads_setting"}) or {}
+    try:
+        config = await ads_col.find_one({"_id": "ads_setting"}) or {}
+    except Exception:
+        config = {}
     
     def status_text(val): return "🟢 ON" if val else "🔴 OFF"
 
@@ -148,9 +137,6 @@ async def toggle_ad_status(client, callback_query):
     if callback_query.from_user.id != ADMIN_ID:
         return await callback_query.answer("Unauthorized!", show_alert=True)
 
-    if ads_col is None:
-        return await callback_query.answer("Database not connected!", show_alert=True)
-
     key_map = {
         "toggle_ad1": "ad1_status", "toggle_ad2": "ad2_status",
         "toggle_ad3": "ad3_status", "toggle_ad4": "ad4_status",
@@ -169,8 +155,6 @@ async def toggle_ad_status(client, callback_query):
 # --- ADMIN COMMANDS ---
 @bot_client.on_message(filters.command("stats") & filters.user(ADMIN_ID))
 async def stats_handler(client: Client, message: Message):
-    if users_col is None:
-        return await message.reply_text("❌ Database not connected.")
     total_users = await users_col.count_documents({})
     await message.reply_text(f"📊 **Bot Statistics:**\n\nकुल पंजीकृत यूज़र्स: `{total_users}`")
 
@@ -178,7 +162,7 @@ async def stats_handler(client: Client, message: Message):
 async def start_services():
     try:
         await bot_client.start()
-        print("Telegram Bot Started!")
+        print("Telegram Bot Started Successfully!")
     except Exception as e:
         print(f"Bot start failed: {e}")
     
