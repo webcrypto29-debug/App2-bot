@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veronica Bot - Unlock Content</title>
+
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Monetag Rewarded SDK -->
+    <script src='//libtl.com/sdk.js' data-zone='11452552' data-sdk='show_11452552'></script>
+
+    <!-- ProPush Notification Script Container -->
+    <div id="propush-container"></div>
+
+    <style>
+        body {
+            background-color: #0b1120;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card {
+            background-color: #172033;
+            padding: 24px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-sizing: border-box;
+        }
+
+        .ad-slot {
+            width: 100%;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .icon { font-size: 44px; margin-bottom: 10px; display: block; }
+        h2 { margin: 0 0 10px 0; font-size: 22px; font-weight: 700; color: #ffffff; }
+        p { color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 0 0 20px 0; }
+        .btn { color: white; border: none; padding: 14px 20px; font-size: 16px; font-weight: 600; border-radius: 12px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-blue { background-color: #2563eb; }
+        .btn-green { background-color: #16a34a; }
+        #screen2 { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- SCREEN 1 -->
+    <div class="container" id="screen1">
+        <div class="ad-slot" id="ad-slot-1">
+            <!-- Dynamic Banner Ad 1 -->
+        </div>
+
+        <div class="card">
+            <span class="icon">🔒</span>
+            <h2>Unlock Your Content</h2>
+            <p>Watch a short ad completely to get <b>+3 Credits</b> and auto-download your file.</p>
+            <button class="btn btn-blue" onclick="watchAd()">Watch Ad to Unlock 🚀</button>
+        </div>
+
+        <div class="ad-slot" id="ad-slot-2">
+            <!-- Dynamic Banner Ad 2 -->
+        </div>
+    </div>
+
+    <!-- SCREEN 2 -->
+    <div class="container" id="screen2">
+        <div class="ad-slot" id="ad-slot-3">
+            <!-- Dynamic Banner Ad 3 -->
+        </div>
+
+        <div class="card">
+            <span class="icon">🎁</span>
+            <h2>Unlock Your File</h2>
+            <p>Watch a short rewarded ad to automatically unlock your file in Telegram.</p>
+            <button class="btn btn-green" onclick="getFiles()">Get Files 🚀</button>
+        </div>
+
+        <div class="ad-slot" id="ad-slot-4">
+            <!-- Dynamic Banner Ad 4 -->
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function watchAd() {
+            if (typeof show_11452552 === 'function') {
+                show_11452552().then(() => {
+                    document.getElementById("screen1").style.display = "none";
+                    document.getElementById("screen2").style.display = "flex";
+                }).catch((err) => {
+                    alert("Ad skipped or failed to complete. Please watch the full ad!");
+                });
+            } else {
+                alert("Ad provider is still loading or blocked. Please wait 2 seconds!");
+            }
+        }
+
+        function getFiles() {
+            window.location.href = "https://t.me/YOUR_NEW_BOT_USERNAME?start=VERIFY_AD";
+        }
+    </script>
+</body>
+</html>
