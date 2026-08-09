@@ -1,8 +1,18 @@
-pyrogram==2.0.106
-tgcrypto==1.2.5
-pymongo[srv]==4.6.1
-motor==3.3.2
-aiofiles==23.2.1
-requests==2.31.0
-uvicorn==0.27.1
-fastapi==0.109.2
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Files copy karein
+COPY . /app/
+
+# Requirements install karein
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Back4App ke liye Port Expose karein
+EXPOSE 8080
+
+# Environment Variable set karein
+ENV PORT=8080
+
+# Bot Run karein
+CMD ["python", "app2.py"]
