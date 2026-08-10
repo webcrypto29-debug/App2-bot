@@ -12,10 +12,14 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "8953998418:AAGeNgtWXGgEZzO-7HrtvwdL65Y5
 API_ID = int(os.environ.get("API_ID", "31367866"))
 API_HASH = os.environ.get("API_HASH", "575b2840f685a037000ead32cde239e1")
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "6860017124"))
-MONGO_URI = os.environ.get("MONGO_DB_URI", "mongodb+srv://webcrypto29:iR8EByf860BymwO3@cluster0.pffy51l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+
+# NEW MONODB URI UPDATED HERE
+MONGO_URI = os.environ.get(
+    "MONGO_DB_URI", 
+    "mongodb+srv://hyugvbbjiiuh_db_user:xETYAY8SQFQNMZoe@cluster0.rnxrb52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+)
 DB_NAME = os.environ.get("DATABASE_NAME", "MyBot2DB")
 
-# WEBAPP URL (404 एरर ठीक करने के लिए index.html पर सेट किया गया है)
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://webcrypto29-debug.github.io/My-file-bot/index.html")
 PORT = int(os.environ.get("PORT", "8080"))
 
@@ -52,7 +56,7 @@ async def init_ads_config():
     except Exception as e:
         print(f"Database setup notice: {e}")
 
-# --- FASTAPI LIFESPAN MANAGER (Back4App & Pyrogram Synergy) ---
+# --- FASTAPI LIFESPAN MANAGER ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting Telegram Bot...")
@@ -95,7 +99,6 @@ async def start_handler(client: Client, message: Message):
     except Exception as e:
         print(f"DB Error: {e}")
 
-    # Verify Ad Completion
     if len(message.command) > 1 and message.command[1] == "VERIFY_AD":
         try:
             await users_col.update_one({"_id": user_id}, {"$inc": {"credits": 3}})
@@ -154,7 +157,6 @@ async def ads_control_panel(client: Client, message: Message):
 
 @bot_client.on_callback_query(filters.regex("^toggle_"))
 async def toggle_ad_status(client, callback_query):
-    # तुरंत लोडिंग स्पिनर हटाने के लिए आंसर
     await callback_query.answer("Processing...", show_alert=False)
 
     if callback_query.from_user.id != ADMIN_ID:
@@ -178,7 +180,5 @@ async def stats_handler(client: Client, message: Message):
     total_users = await users_col.count_documents({})
     await message.reply_text(f"📊 **Bot Statistics:**\n\nकुल पंजीकृत यूज़र्स: `{total_users}`")
 
-# --- MAIN RUNNER ---
 if __name__ == "__main__":
     uvicorn.run("app2:web_app", host="0.0.0.0", port=PORT, log_level="info")
-.
