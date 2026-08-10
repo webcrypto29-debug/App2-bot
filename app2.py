@@ -1,5 +1,4 @@
 import os
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -9,17 +8,20 @@ from pyrogram import Client
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Environment Variables
+# Environment Variables Read Karein
 MONGO_URI = os.getenv("MONGO_URI")
-API_ID = int(os.getenv("API_ID", "0")) if os.getenv("API_ID") else None
+API_ID_ENV = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# API_ID ko integer mein parse karein
+API_ID = int(API_ID_ENV) if API_ID_ENV and API_ID_ENV.isdigit() else None
 
 # MongoDB Client
 mongo_client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = mongo_client["my_telegram_bot_db"]
 
-# Pyrogram Client Setup
+# Bot Client Setup
 bot = None
 if API_ID and API_HASH and BOT_TOKEN:
     bot = Client(
@@ -28,6 +30,8 @@ if API_ID and API_HASH and BOT_TOKEN:
         api_hash=API_HASH,
         bot_token=BOT_TOKEN
     )
+else:
+    logger.error("Missing required variables: API_ID, API_HASH, or BOT_TOKEN!")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,7 +52,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# Health check route for Back4App (Fixes 405 Method Not Allowed)
 @app.get("/")
 async def health_check():
     return {"status": "ok", "message": "Bot Server Running"}
