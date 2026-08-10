@@ -6,4 +6,5 @@ aiofiles
 requests
 uvicorn
 fastapi
+dnspython
 
