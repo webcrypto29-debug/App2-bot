@@ -13,7 +13,6 @@ API_ID = int(os.environ.get("API_ID", "31367866"))
 API_HASH = os.environ.get("API_HASH", "575b2840f685a037000ead32cde239e1")
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "6860017124"))
 
-# NEW MONODB URI UPDATED HERE
 MONGO_URI = os.environ.get(
     "MONGO_DB_URI", 
     "mongodb+srv://hyugvbbjiiuh_db_user:xETYAY8SQFQNMZoe@cluster0.rnxrb52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
